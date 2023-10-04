@@ -1,0 +1,3 @@
+Failed to convert ./database/NonWheelChair\D00443.obj
+
+Failed to convert ./database/todo\Quadruped\m109.obj
