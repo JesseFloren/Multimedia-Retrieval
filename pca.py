@@ -62,7 +62,7 @@ def do_pca(mesh_path, visualization_offset=np.array([0, 0, 0])):
 
 def main():
     # Parameters
-    mesh1, lineset1 = do_pca("./database/Jet\m1155.obj")
+    mesh1, lineset1 = do_pca("m514.obj")
     print(lineset1)
     mesh2, lineset2 = do_pca("m514_REMESHED.obj", np.array([2, 0, 0]))
 
