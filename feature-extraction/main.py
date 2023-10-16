@@ -1,3 +1,5 @@
+import multiprocessing 
+
 import angle_distance_distr as ad
 import hole_stitching as hs
 import open3d as o3d
@@ -33,6 +35,15 @@ def get_feature_vector(mesh):
 
     return [V, S, c, D, R, E, C, A3, D1, D2, D3, D4]
 
+def generate_feature_file(obj_file_path):
+    try:
+        dbpath = r"./resampled3/"
+        vect = get_feature_vector(o3d.io.read_triangle_mesh(obj_file_path))
+        data_file = open(obj_file_path.replace(dbpath, r"./features/").replace(".obj", ""), "wb")
+        np.save(data_file, np.asarray(vect, dtype="object"))
+        data_file.close()
+    except:
+        pass
 
 if __name__ == "__main__":
     dbpath = r"./resampled3/"
@@ -44,11 +55,6 @@ if __name__ == "__main__":
                 os.mkdir("./features/" + class_name)
             except:
                 continue
-            for obj_file_path in glob.glob(os.path.join(class_folder_path, '*.obj')):
-                try:
-                    vect = get_feature_vector(o3d.io.read_triangle_mesh(obj_file_path))
-                    data_file = open(obj_file_path.replace(dbpath, r"./features/").replace(".obj", ""), "wb")
-                    np.save(data_file, np.asarray(vect, dtype="object"))
-                    data_file.close()
-                except:
-                    continue
+            file_paths = glob.glob(os.path.join(class_folder_path, '*.obj'))
+            with multiprocessing.Pool() as pool: 
+                results = pool.map(generate_feature_file, file_paths) 
