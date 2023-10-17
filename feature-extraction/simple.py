@@ -1,4 +1,6 @@
 import math
+from hole_stitching import stitch_mesh_holes
+from volume import get_mesh_volume
 import numpy as np
 import open3d as o3d
 
@@ -12,19 +14,23 @@ def calc_rectangularity(mesh, V):
 
 def calc_diameter(mesh):
     D = 0
-    verts = np.asarray(mesh.vertices)
+    Hull, _ = mesh.compute_convex_hull()
+    verts = np.asarray(Hull.vertices)
 
     for x1, y1, z1 in verts:
         for x2, y2, z2 in verts:
             currD = ((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)**0.5
             if D < currD:
                 D = currD
-    
     return D
 
 def calc_convexity(mesh, V):
     Hull, _ = mesh.compute_convex_hull()
-    Vch = Hull.get_volume()
+    if Hull.is_watertight():
+        Vch = Hull.get_volume()
+    else:
+        v, t = stitch_mesh_holes(Hull)
+        Vch = get_mesh_volume(v, t)
     C = V / Vch
     return C
 

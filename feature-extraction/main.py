@@ -1,4 +1,5 @@
 import multiprocessing 
+import sys
 
 import angle_distance_distr as ad
 import hole_stitching as hs
@@ -23,11 +24,18 @@ def get_feature_vector(mesh):
     R = si.calc_rectangularity(mesh, V)
     E = si.calc_eccentricity(mesh)
     C = si.calc_convexity(mesh, V)
-    A3 = ad.normalise_distribution(ad.calc_mesh_a3(mesh, 1000000), 1000, 180)
-    D1 = ad.normalise_distribution(ad.calc_mesh_d1(mesh, 1000000), 1000, 1)
-    D2 = ad.normalise_distribution(ad.calc_mesh_d2(mesh, 1000000), 1000, 1)
-    D3 = ad.normalise_distribution(ad.calc_mesh_d3(mesh, 1000000), 1000, 1)
-    D4 = ad.normalise_distribution(ad.calc_mesh_d4(mesh, 1000000), 1000, 1)
+
+    A3_data = ad.calc_mesh_a3(mesh, 1000000)
+    A3 = ad.normalise_distribution(A3_data, 40, 180)
+    D1_data = ad.calc_mesh_d1(mesh, 1000000)
+    D1 = ad.normalise_distribution(D1_data, 40, np.max(D1_data))
+    D2_data = ad.calc_mesh_d2(mesh, 1000000)
+    D2 = ad.normalise_distribution(D2_data, 40, np.max(D2_data))
+    D3_data = ad.calc_mesh_d3(mesh, 1000000)
+    D3 = ad.normalise_distribution(D3_data, 40, np.max(D3_data))
+    D4_data = ad.calc_mesh_d4(mesh, 1000000)
+    D4 = ad.normalise_distribution(D4_data, 40, np.max(D4_data))
+
 
     et = time.time()
     elapsed_time = et - st
@@ -36,25 +44,34 @@ def get_feature_vector(mesh):
     return [V, S, c, D, R, E, C, A3, D1, D2, D3, D4]
 
 def generate_feature_file(obj_file_path):
-    try:
-        dbpath = r"./resampled3/"
-        vect = get_feature_vector(o3d.io.read_triangle_mesh(obj_file_path))
-        data_file = open(obj_file_path.replace(dbpath, r"./features/").replace(".obj", ""), "wb")
-        np.save(data_file, np.asarray(vect, dtype="object"))
-        data_file.close()
-    except:
-        pass
+    dbpath = r"./resampled5/"
+    file_path = obj_file_path.replace(dbpath, r"./features/").replace(".obj", "")
+    data_file = open(file_path, "wb")
+
+    vect = get_feature_vector(o3d.io.read_triangle_mesh(obj_file_path))
+    np.save(data_file, np.asarray(vect, dtype="object"))
+    data_file.close()
+
 
 if __name__ == "__main__":
-    dbpath = r"./resampled3/"
-    for class_folder in os.listdir(dbpath):
-        class_folder_path = os.path.join(dbpath, class_folder)
-        if os.path.isdir(class_folder_path):
-            class_name = class_folder
-            try:
-                os.mkdir("./features/" + class_name)
-            except:
-                continue
-            file_paths = glob.glob(os.path.join(class_folder_path, '*.obj'))
+    if len(sys.argv) > 1:
+        try:
+            os.mkdir("./features/" + sys.argv[1])
+            file_paths = glob.glob(os.path.join(r"./resampled5/{}".format(sys.argv[1]) , '*.obj'))
             with multiprocessing.Pool() as pool: 
-                results = pool.map(generate_feature_file, file_paths) 
+                pool.map(generate_feature_file, file_paths[:11]) 
+        except:
+            pass
+    else:
+        dbpath = r"./resampled5/"
+        for class_folder in os.listdir(dbpath):
+            class_folder_path = os.path.join(dbpath, class_folder)
+            if os.path.isdir(class_folder_path):
+                class_name = class_folder
+                try:
+                    os.mkdir("./features/" + class_name)
+                except:
+                    continue
+                file_paths = glob.glob(os.path.join(class_folder_path, '*.obj'))
+                with multiprocessing.Pool() as pool: 
+                    pool.map(generate_feature_file, file_paths) 
