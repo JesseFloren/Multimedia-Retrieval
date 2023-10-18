@@ -165,4 +165,9 @@ database/**/
 database/class_sizes_plot.png
 database/stats.txt
 resampled_old/*
+resampled2/
+resampled/*
+resampled4/
+ignore/
 refined_*
+log*
