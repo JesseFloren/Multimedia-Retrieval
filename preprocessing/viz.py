@@ -116,8 +116,6 @@ def viz_mesh(obj_file_path, vis_option = "wireframe_on_shaded"):
 
 def show_aabb(mesh_path):
 
-    # mesh_path = dbpath + r"Sign/m1675.obj"
-    mesh_path = "./resampledO3D/Cup/D00363.obj"
     mesh = o3d.io.read_triangle_mesh(mesh_path)
     mesh.compute_vertex_normals()
     aabb = mesh.get_axis_aligned_bounding_box()

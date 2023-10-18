@@ -316,7 +316,7 @@ def run_resampling_o3d(dbpath=r"./database/", target_vertices=7000, factor=0.1, 
                     print(obj_file_path)
                     # mesh.compute_vertex_normals()
                     mesh = translate_to_center(mesh)
-                    _,vAfter,_,_ = remesh_o3d(mesh, class_name, obj_file_path.split("\\")[-1], target_vertices, factor,, newfolderpath = "./resampledo3d")
+                    _,vAfter,_,_ = remesh_o3d(mesh, class_name, obj_file_path.split("\\")[-1], target_vertices, factor, newfolderpath = "./resampledo3d")
                     if vAfter not in range(int(target_vertices* (1-factor)),int(target_vertices* (1+factor))):
                         print(f"Object outside of Vertex range {obj_file_path}, Vertices = {vAfter}", file=log)
 
