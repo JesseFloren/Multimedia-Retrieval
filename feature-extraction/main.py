@@ -25,11 +25,11 @@ def get_feature_vector(mesh):
     E = si.calc_eccentricity(mesh)
     C = si.calc_convexity(mesh, V)
 
-    A3_data = ad.calc_mesh_a3(mesh, 1000000)
+    A3_data = ad.calc_mesh_a3(mesh, 100000)
     A3 = ad.normalise_distribution(A3_data, 40, 180)
-    D1_data = ad.calc_mesh_d1(mesh, 1000000)
+    D1_data = ad.calc_mesh_d1(mesh, 10000)
     D1 = ad.normalise_distribution(D1_data, 40, np.max(D1_data))
-    D2_data = ad.calc_mesh_d2(mesh, 1000000)
+    D2_data = ad.calc_mesh_d2(mesh, 50000)
     D2 = ad.normalise_distribution(D2_data, 40, np.max(D2_data))
     D3_data = ad.calc_mesh_d3(mesh, 1000000)
     D3 = ad.normalise_distribution(D3_data, 40, np.max(D3_data))
@@ -55,13 +55,10 @@ def generate_feature_file(obj_file_path):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        try:
-            os.mkdir("./features/" + sys.argv[1])
-            file_paths = glob.glob(os.path.join(r"./resampled5/{}".format(sys.argv[1]) , '*.obj'))
-            with multiprocessing.Pool() as pool: 
-                pool.map(generate_feature_file, file_paths[:11]) 
-        except:
-            pass
+        os.mkdir("./features/" + sys.argv[1])
+        file_paths = glob.glob(os.path.join(r"./resampled5/{}".format(sys.argv[1]) , '*.obj'))
+        with multiprocessing.Pool() as pool: 
+            pool.map(generate_feature_file, file_paths) 
     else:
         dbpath = r"./resampled5/"
         for class_folder in os.listdir(dbpath):

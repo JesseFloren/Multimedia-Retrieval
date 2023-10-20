@@ -3,7 +3,7 @@ import math
 import volume as v
 
 def normalise_distribution(data, bins, max):
-    step = max / bins
+    step = max / math.sqrt(len(data))
     curr_step = 0
     norm_hist = []
 
@@ -25,7 +25,11 @@ def calc_mesh_a3(mesh, n):
 
     for a, b, c in a3_sample:
 
+        if sum(a - b) == 0 or sum(b - c) == 0 or sum(c - a) == 0: 
+            continue
+
         ab = a - b; bc = c - b
+
         abVec = math.sqrt(sum(ab * ab))
         bcVec = math.sqrt(sum(bc * bc))
 
