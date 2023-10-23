@@ -44,7 +44,7 @@ def get_feature_vector(mesh):
     return [V, S, c, D, R, E, C, A3, D1, D2, D3, D4]
 
 def generate_feature_file(obj_file_path):
-    dbpath = r"./resampled5/"
+    dbpath = r"./resampledPML/"
     file_path = obj_file_path.replace(dbpath, r"./features/").replace(".obj", "")
     data_file = open(file_path, "wb")
 
@@ -56,11 +56,11 @@ def generate_feature_file(obj_file_path):
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         os.mkdir("./features/" + sys.argv[1])
-        file_paths = glob.glob(os.path.join(r"./resampled5/{}".format(sys.argv[1]) , '*.obj'))
+        file_paths = glob.glob(os.path.join(r"./resampledPML/{}".format(sys.argv[1]) , '*.obj'))
         with multiprocessing.Pool() as pool: 
             pool.map(generate_feature_file, file_paths) 
     else:
-        dbpath = r"./resampled5/"
+        dbpath = r"./resampledPML/"
         for class_folder in os.listdir(dbpath):
             class_folder_path = os.path.join(dbpath, class_folder)
             if os.path.isdir(class_folder_path):
@@ -70,5 +70,6 @@ if __name__ == "__main__":
                 except:
                     continue
                 file_paths = glob.glob(os.path.join(class_folder_path, '*.obj'))
+
                 with multiprocessing.Pool() as pool: 
                     pool.map(generate_feature_file, file_paths) 
