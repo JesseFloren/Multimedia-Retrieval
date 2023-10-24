@@ -2,18 +2,23 @@ import numpy as np
 import math
 import volume as v
 
-def normalise_distribution(data, bins, max):
-    step = max / math.sqrt(len(data))
+def normalise_distribution(data, max):
+    bins = round(math.sqrt(len(data)))
+    step = max / bins
     curr_step = 0
     norm_hist = []
 
-    for _ in range(bins):
-        count = 0
-        for d in data:
-            if d > curr_step and d < (curr_step + step):
-                count += 1
-        norm_hist.append(count)
-        curr_step += step
+    data.sort()
+
+    curr_step += step
+    curr_bin = 0
+    for i in data:
+        if i > curr_step:
+            norm_hist.append(curr_bin)
+            curr_step += step
+            curr_bin = 0
+        curr_bin += 1
+    norm_hist.append(curr_bin)
 
     norm_hist = np.asarray(norm_hist) / sum(norm_hist)
     return norm_hist
@@ -61,9 +66,13 @@ def calc_mesh_d2(mesh, n):
     d2_dist = []
 
     for i in range(n):
+
         xb, yb, zb = d2_sample1[i]
         xs, ys, zs = d2_sample2[i]
+
         d = ((xs - xb)**2 + (ys - yb)**2 + (zs - zb)**2)**0.5
+        if d == 0:
+            continue
         d2_dist.append(d)
 
     return d2_dist
@@ -86,6 +95,8 @@ def calc_mesh_d3(mesh, n):
         Xac, Yac, Zac = A - Cp
 
         d = ((Yab * Zac - Zab * Yac)**2 + (Zab * Xac - Xab * Zac)**2 + (Xab * Yac - Yab * Xac)**2)**0.5
+        if d == 0:
+            continue
         d3_dist.append(d)
 
     return np.sqrt(d3_dist)
@@ -110,6 +121,8 @@ def calc_mesh_d4(mesh, n):
         ad = A - Dp
 
         d = abs(v.determinant_3x3((ab,ac,ad)) / 6)
+        if d == 0:
+            continue
         d4_dist.append(d)
 
     return np.cbrt(d4_dist)

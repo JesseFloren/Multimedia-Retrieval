@@ -15,7 +15,6 @@ import simple as si
 
 def get_feature_vector(mesh):
     st = time.time()
-    
     verticies, triangles = hs.stitch_mesh_holes(mesh)
     V = v.get_mesh_volume(verticies, triangles)
     S = s.get_surface(verticies, triangles)
@@ -25,17 +24,17 @@ def get_feature_vector(mesh):
     E = si.calc_eccentricity(mesh)
     C = si.calc_convexity(mesh, V)
 
-    A3_data = ad.calc_mesh_a3(mesh, 1000000)
-    A3 = ad.normalise_distribution(A3_data, 40, 180)
-    D1_data = ad.calc_mesh_d1(mesh, 10000)
-    D1 = ad.normalise_distribution(D1_data, 40, np.max(D1_data))
-    D2_data = ad.calc_mesh_d2(mesh, 100000)
-    D2 = ad.normalise_distribution(D2_data, 40, np.max(D2_data))
-    D3_data = ad.calc_mesh_d3(mesh, 1000000)
-    D3 = ad.normalise_distribution(D3_data, 40, np.max(D3_data))
-    D4_data = ad.calc_mesh_d4(mesh, 1000000)
-    D4 = ad.normalise_distribution(D4_data, 40, np.max(D4_data))
 
+    A3_data = ad.calc_mesh_a3(mesh, 1000000)
+    A3 = ad.normalise_distribution(A3_data, 180)
+    D1_data = ad.calc_mesh_d1(mesh, 10000)
+    D1 = ad.normalise_distribution(D1_data, np.max(D1_data))
+    D2_data = ad.calc_mesh_d2(mesh, 100000)
+    D2 = ad.normalise_distribution(D2_data, np.max(D2_data))
+    D3_data = ad.calc_mesh_d3(mesh, 1000000)
+    D3 = ad.normalise_distribution(D3_data, np.max(D3_data))
+    D4_data = ad.calc_mesh_d4(mesh, 1000000)
+    D4 = ad.normalise_distribution(D4_data, np.max(D4_data))
 
     et = time.time()
     elapsed_time = et - st
