@@ -1,9 +1,10 @@
 import numpy as np
 import math
 import volume as v
+import random
 
 def normalise_distribution(data, max):
-    bins = round(math.sqrt(len(data)))
+    bins = 100
     step = max / bins
     curr_step = 0
     norm_hist = []
@@ -25,24 +26,21 @@ def normalise_distribution(data, max):
 
 def calc_mesh_a3(mesh, n):
     vertices = np.asarray(mesh.vertices)
-    a3_sample = vertices[np.random.randint(len(vertices), size=(n, 3))]
+    a3_sample = vertices[unique_random_index3(n, range(len(vertices)))]
     a3_dist = []
 
     for a, b, c in a3_sample:
-
-        if sum(a - b) == 0 or sum(b - c) == 0 or sum(c - a) == 0: 
-            continue
-
         ab = a - b; bc = c - b
 
         abVec = math.sqrt(sum(ab * ab))
         bcVec = math.sqrt(sum(bc * bc))
 
-        try:        
+        try:
             res = sum((ab / abVec) * (bc / bcVec))
             a3_dist.append(math.acos(res)*180.0/ math.pi)
         except:
             continue
+
     return a3_dist
 
 def calc_mesh_d1(mesh, n):
@@ -60,69 +58,78 @@ def calc_mesh_d1(mesh, n):
 
 def calc_mesh_d2(mesh, n):
     vertices = np.asarray(mesh.vertices)
-    d2_sample1 = vertices[np.random.randint(len(vertices), size=(n))]
-    d2_sample2 = vertices[np.random.randint(len(vertices), size=(n))]
+    d2_sample = vertices[unique_random_index2(n, range(len(vertices)))]
 
     d2_dist = []
 
     for i in range(n):
 
-        xb, yb, zb = d2_sample1[i]
-        xs, ys, zs = d2_sample2[i]
+        xb, yb, zb = d2_sample[i][0]
+        xs, ys, zs = d2_sample[i][1]
 
         d = ((xs - xb)**2 + (ys - yb)**2 + (zs - zb)**2)**0.5
-        if d == 0:
-            continue
         d2_dist.append(d)
 
     return d2_dist
 
 def calc_mesh_d3(mesh, n):
     vertices = np.asarray(mesh.vertices)
-    d3_sample1 = vertices[np.random.randint(len(vertices), size=(n))]
-    d3_sample2 = vertices[np.random.randint(len(vertices), size=(n))]
-    d3_sample3 = vertices[np.random.randint(len(vertices), size=(n))]
-
+    d3_sample = vertices[unique_random_index3(n, range(len(vertices)))]
 
     d3_dist = []
 
     for i in range(n):
-        A = d3_sample1[i]
-        B = d3_sample2[i]
-        Cp = d3_sample3[i]
+        A, B, Cp = d3_sample[i]
 
         Xab, Yab, Zab = A - B
         Xac, Yac, Zac = A - Cp
 
         d = ((Yab * Zac - Zab * Yac)**2 + (Zab * Xac - Xab * Zac)**2 + (Xab * Yac - Yab * Xac)**2)**0.5
-        if d == 0:
-            continue
         d3_dist.append(d)
 
     return np.sqrt(d3_dist)
 
 def calc_mesh_d4(mesh, n):
     vertices = np.asarray(mesh.vertices)
-    d4_sample1 = vertices[np.random.randint(len(vertices), size=n)]
-    d4_sample2 = vertices[np.random.randint(len(vertices), size=(n))]
-    d4_sample3 = vertices[np.random.randint(len(vertices), size=(n))]
-    d4_sample4 = vertices[np.random.randint(len(vertices), size=(n))]
+    d4_sample = vertices[unique_random_index4(n, range(len(vertices)))]
 
     d4_dist = []
 
     for i in range(n):
-        A = d4_sample1[i]
-        B = d4_sample2[i]
-        Cp = d4_sample3[i]
-        Dp = d4_sample4[i]
+        A, B, Cp, Dp = d4_sample[i]
 
         ab = A - B
         ac = A - Cp
         ad = A - Dp
 
         d = abs(v.determinant_3x3((ab,ac,ad)) / 6)
-        if d == 0:
-            continue
         d4_dist.append(d)
 
     return np.cbrt(d4_dist)
+
+def give_random_triplets(n, m, input):
+    return np.random.choice(input, size=(n, m), replace=True)
+
+def unique_random_index2(n, input):
+    random_triplets = give_random_triplets(n, 2, input)
+    equal_indices = np.where((random_triplets[:, 0] == random_triplets[:, 1]))
+    while equal_indices[0].size > 0:
+        random_triplets[equal_indices] = give_random_triplets(random_triplets[equal_indices].shape[0], 2, input)
+        equal_indices = np.where((random_triplets[:, 0] == random_triplets[:, 1]))
+    return np.asarray(random_triplets)
+
+def unique_random_index3(n, input):
+    random_triplets = give_random_triplets(n, 3, input)
+    equal_indices = np.where((random_triplets[:, 0] == random_triplets[:, 1]) | (random_triplets[:, 1] == random_triplets[:, 2]) | (random_triplets[:, 0] == random_triplets[:, 2]))
+    while equal_indices[0].size > 0:
+        random_triplets[equal_indices] = give_random_triplets(random_triplets[equal_indices].shape[0], 3, input)
+        equal_indices = np.where((random_triplets[:, 0] == random_triplets[:, 1]) | (random_triplets[:, 1] == random_triplets[:, 2]) | (random_triplets[:, 0] == random_triplets[:, 2]))
+    return np.asarray(random_triplets)
+
+def unique_random_index4(n, input):
+    random_triplets = give_random_triplets(n, 4, input)
+    equal_indices = np.where((random_triplets[:, 0] == random_triplets[:, 1]) | (random_triplets[:, 1] == random_triplets[:, 2]) | (random_triplets[:, 0] == random_triplets[:, 2]) | (random_triplets[:, 0] == random_triplets[:, 3]) | (random_triplets[:, 1] == random_triplets[:, 3]) | (random_triplets[:, 2] == random_triplets[:, 3]))
+    while equal_indices[0].size > 0:
+        random_triplets[equal_indices] = give_random_triplets(random_triplets[equal_indices].shape[0], 4, input)
+        equal_indices = np.where((random_triplets[:, 0] == random_triplets[:, 1]) | (random_triplets[:, 1] == random_triplets[:, 2]) | (random_triplets[:, 0] == random_triplets[:, 2]) | (random_triplets[:, 0] == random_triplets[:, 3]) | (random_triplets[:, 1] == random_triplets[:, 3]) | (random_triplets[:, 2] == random_triplets[:, 3]))
+    return np.asarray(random_triplets)

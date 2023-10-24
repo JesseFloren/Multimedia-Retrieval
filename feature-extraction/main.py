@@ -56,8 +56,11 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         os.mkdir("./features/" + sys.argv[1])
         file_paths = glob.glob(os.path.join(r"./resampledPML/{}".format(sys.argv[1]) , '*.obj'))
-        with multiprocessing.Pool() as pool: 
-            pool.map(generate_feature_file, file_paths) 
+        # with multiprocessing.Pool() as pool: 
+        #     pool.map(generate_feature_file, file_paths) 
+        
+        for file in file_paths:
+            generate_feature_file(file)
     else:
         dbpath = r"./resampledPML/"
         for class_folder in os.listdir(dbpath):
