@@ -3,26 +3,12 @@ import math
 import volume as v
 import random
 
-def normalise_distribution(data, max):
-    bins = 100
-    step = max / bins
-    curr_step = 0
-    norm_hist = []
-
-    data.sort()
-
-    curr_step += step
-    curr_bin = 0
-    for i in data:
-        if i > curr_step:
-            norm_hist.append(curr_bin)
-            curr_step += step
-            curr_bin = 0
-        curr_bin += 1
-    norm_hist.append(curr_bin)
-
-    norm_hist = np.asarray(norm_hist) / sum(norm_hist)
-    return norm_hist
+def normalise_distribution(data):
+    data_max = max(data)
+    step = data_max / 100
+    bins = [i * step for i in range(101)]
+    hist,_ = np.histogram(data,bins=bins)
+    return hist / sum(hist)
 
 def calc_mesh_a3(mesh, n):
     vertices = np.asarray(mesh.vertices)
