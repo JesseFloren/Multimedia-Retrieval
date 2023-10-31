@@ -5,7 +5,7 @@ def get_mesh_volume(verticies, triangles):
     for t in triangles:
         o = np.mean(verticies, axis=0)
         V += get_tetahedron_volume(verticies[t], o)
-    return V
+    return abs(V)
 
 def get_tetahedron_volume(triangle, barycenter):
     a, b, c = triangle
