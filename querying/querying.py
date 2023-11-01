@@ -125,7 +125,11 @@ def update_weighting(class_name, n, start_weight1, start_weight2):
 
 
 def do_class_weighting(i):
-    return update_weighting(classes[i], 50, [ 30, 155,  61 ,177 ,113 , 66, 143], [153, 102 , 48 ,106 , 90  ,88])
+    try:
+        return update_weighting(classes[i], 50, [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1])
+    except:
+        print(i)
+        exit()
 
 
 def train_weights():
@@ -157,12 +161,15 @@ def test_class(c):
 
 def test_classes():
     acc = []
-    with multiprocessing.Pool(12) as pool:    
-        acc = list(pool.imap(test_class, classes))
+    # with multiprocessing.Pool(12) as pool:    
+    #     acc = list(pool.imap(test_class, classes))
+
+    for c in classes:
+        acc.append(test_class(c))
     print(sum(acc) / len(acc))
 
 
 
 
 if __name__ == '__main__':
-    test_classes()
+    train_weights()

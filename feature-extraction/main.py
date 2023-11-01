@@ -27,7 +27,7 @@ def get_feature_vector(mesh):
 
     A3_data = ad.calc_mesh_a3(mesh, 1000000)
     A3 = ad.normalise_distribution(A3_data)
-    D1_data = ad.calc_mesh_d1(mesh, 10000)
+    D1_data = ad.calc_mesh_d1(mesh)
     D1 = ad.normalise_distribution(D1_data)
     D2_data = ad.calc_mesh_d2(mesh, 100000)
     D2 = ad.normalise_distribution(D2_data)
@@ -43,8 +43,8 @@ def get_feature_vector(mesh):
     return [V, S, c, D, R, E, C, A3, D1, D2, D3, D4]
 
 def generate_feature_file(obj_file_path):
-    dbpath = r"./resampledPML/"
-    file_path = obj_file_path.replace(dbpath, r"./features/").replace(".obj", "")
+    dbpath = r"./resampledO3D/"
+    file_path = obj_file_path.replace(dbpath, r"./featuresO3D/").replace(".obj", "")
     data_file = open(file_path, "wb")
 
     vect = get_feature_vector(o3d.io.read_triangle_mesh(obj_file_path))
@@ -55,20 +55,20 @@ def generate_feature_file(obj_file_path):
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         os.mkdir("./features/" + sys.argv[1])
-        file_paths = glob.glob(os.path.join(r"./resampledPML/{}".format(sys.argv[1]) , '*.obj'))
+        file_paths = glob.glob(os.path.join(r"./resampledO3D/{}".format(sys.argv[1]) , '*.obj'))
         # with multiprocessing.Pool() as pool: 
         #     pool.map(generate_feature_file, file_paths) 
         
         for file in file_paths:
             generate_feature_file(file)
     else:
-        dbpath = r"./resampledPML/"
+        dbpath = r"./resampledO3D/"
         for class_folder in os.listdir(dbpath):
             class_folder_path = os.path.join(dbpath, class_folder)
             if os.path.isdir(class_folder_path):
                 class_name = class_folder
                 try:
-                    os.mkdir("./features/" + class_name)
+                    os.mkdir("./featuresO3D/" + class_name)
                 except:
                     continue
                 file_paths = glob.glob(os.path.join(class_folder_path, '*.obj'))

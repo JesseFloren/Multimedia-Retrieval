@@ -3,7 +3,6 @@ import numpy as np
 # Hole Stitching
 def detect_hole_edges(mesh):
     triangles = np.asarray(mesh.triangles)
-    triangles = np.delete(triangles, [10, 16, 26, 27], axis=0)
     edges = []
     for t1, t2, t3 in triangles:
         v1 = [t1, t2]; v2 = [t2, t3]; v3 = [t3, t1]
@@ -65,9 +64,9 @@ def generate_fan_stitch(mesh, bounds, bounds_verts):
     for i in range(len(bounds)):
         barycenter = np.mean(bounds_verts[i], axis=0)
         bcenter = len(new_vertices)
-        new_vertices = np.vstack([new_vertices, barycenter])
+        new_vertices = np.concatenate([new_vertices, [barycenter]])
         for e1, e2 in bounds[i]:
-            new_triangles = np.vstack([new_triangles, [e1, e2, bcenter]])
+            new_triangles = np.concatenate([new_triangles, [[e2, e1, bcenter]]])
 
     return new_vertices, new_triangles
 

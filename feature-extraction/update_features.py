@@ -34,7 +34,7 @@ def get_feature_vector(mesh, prev, features):
         prev[7] = ad.normalise_distribution(A3_data)
         updated += "A3, "
     if 2 in features:
-        D1_data = ad.calc_mesh_d1(mesh, 10000)
+        D1_data = ad.calc_mesh_d1(mesh)
         prev[8] = ad.normalise_distribution(D1_data)
         updated += "D1, "
     if 3 in features:
@@ -60,7 +60,7 @@ def update_feature_file(obj_file_path):
     dbpath = r"./resampledPML/"
     file_path = obj_file_path.replace(dbpath, r"./features/").replace(".obj", "")
     prev = np.load(file_path, allow_pickle=True)
-    vect = get_feature_vector(o3d.io.read_triangle_mesh(obj_file_path), prev, [0])
+    vect = get_feature_vector(o3d.io.read_triangle_mesh(obj_file_path), prev, [2])
     data_file = open(file_path, "wb")
     np.save(data_file, np.asarray(vect, dtype="object"))
     data_file.close()

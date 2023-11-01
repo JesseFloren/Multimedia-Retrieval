@@ -29,14 +29,13 @@ def calc_mesh_a3(mesh, n):
 
     return a3_dist
 
-def calc_mesh_d1(mesh, n):
+def calc_mesh_d1(mesh):
     vertices = np.asarray(mesh.vertices)
     xb, yb, zb = np.mean(vertices, axis=0)
-    d1_sample = vertices[np.random.randint(len(vertices), size=(n))]
 
     d1_dist = []
 
-    for xs, ys, zs in d1_sample:
+    for xs, ys, zs in vertices:
         d = ((xs - xb)**2 + (ys - yb)**2 + (zs - zb)**2)**0.5
         d1_dist.append(d)
 
