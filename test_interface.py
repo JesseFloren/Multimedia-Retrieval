@@ -15,14 +15,14 @@ questions = [
             ),
 ]
 answers = inquirer.prompt(questions)
-print(answers["classes"])
+#print(answers["classes"])
 
 #create list of items in chosen class
 class_folder_path = os.path.join(dbpath, answers["classes"])
 object_list = []
 for obj_file_path in glob.glob(os.path.join(class_folder_path, '*.obj')):
     object_list.append(obj_file_path)
-print(object_list)
+#print(object_list)
 
 #ask for item to compare
 questions = [
@@ -47,7 +47,7 @@ print("the", k["k"], "most similar object to", input_object["objects"], "are: (f
 ################# visualization functions ####################
 def shift_mesh(mesh, distance):
     "shift all values of mesh to the right to display meshes next to eachother"
-    mesh.vertices = o3d.utility.Vector3dVector(np.asarray(mesh.vertices) + np.array([0, distance, 0]) )
+    mesh.vertices = o3d.utility.Vector3dVector(np.asarray(mesh.vertices) + np.array([0, distance, 0]))
     return mesh
 
 def draw_meshes_results(result_list, draw_unit_cube=False, draw_coordinate_frame=False):
@@ -125,6 +125,7 @@ data = pd.read_pickle("normalized_features_final.pkl")
 # rewrite path name in order to match to the pkl feature database
 path = "./features/"+input_object["objects"].split("/")[2].split(".")[0]
 value = data.loc[data["path"] == path]
+
 
 #visualise the top k similar objects
 k = k["k"] +1
