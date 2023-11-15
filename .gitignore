@@ -160,6 +160,5 @@ cython_debug/
 .idea/
 .vscode/
 
-database/**/
 database/class_sizes_plot.png
 database/stats.txt
