@@ -268,6 +268,69 @@ def remesh(mesh, classname, filename, target_vertices=7000, factor=0.2, newfolde
             # meshcopy = mesh
             meshcopy = copymesh(mesh)
 
+
+def remesh_pml2(mesh, classname, filename, newfolderpath="./resampledPML2", target_vertices=7000):
+    # mesh = pml.MeshSet()
+    # mesh.load_new_mesh(mesh_path)
+    print(f"Vertices before: {mesh.current_mesh().vertex_number()}, Faces before: {mesh.current_mesh().face_number()}")
+
+    count = 0
+    targetlen = 0.02        
+    # if mesh.current_mesh().vertex_number() < target_vertices * (1-factor):
+    while mesh.current_mesh().vertex_number() < int(target_vertices) and count < 5:
+        count += 1
+        targetlen //= 2
+        mesh.meshing_isotropic_explicit_remeshing(targetlen=pml.AbsoluteValue(targetlen), iterations=1)
+        
+
+
+        # meshcopy = o3d_to_pml(copy.deepcopy(pml_to_o3d(mesh)))
+        # # meshcopy = mesh
+        # meshcopy = copymesh(mesh)
+
+        # count = 0
+        # factor2 = 1
+        # maxcount = 15
+        # while meshcopy.current_mesh().vertex_number() not in range(int(target_vertices* (1-factor)),int(target_vertices* (1+factor))) and count < maxcount:
+        #     count += 1
+        #     meshcopy.meshing_decimation_quadric_edge_collapse(targetfacenum=int(factor2 * int(target_vertices*(mesh.current_mesh().face_number()/mesh.current_mesh().vertex_number())))) #Uses the ratio of Triangles/Vertices to determine the target triangles
+        #     print(f"Target: {int(factor2 * int(target_vertices*(mesh.current_mesh().face_number()/mesh.current_mesh().vertex_number())))}")
+        #     print(f"Result: {meshcopy.current_mesh().vertex_number()}")
+        #     if count == maxcount:
+        #         mesh = meshcopy
+        #     elif meshcopy.current_mesh().vertex_number() < target_vertices* (1-factor):
+        #         factor2 *= 1.1
+        #     elif meshcopy.current_mesh().vertex_number() > target_vertices* (1+factor):
+        #         factor2 *= 0.9
+        #     else:
+        #         mesh = meshcopy
+
+        #     # meshcopy = o3d_to_pml(copy.deepcopy(pml_to_o3d(mesh)))
+        #     # meshcopy = mesh
+        #     meshcopy = copymesh(mesh)
+
+    ###
+    # count = 0
+    # targetlen = 0.02
+    # while mesh.current_mesh().vertex_number() < target_vertices* (1-factor) and count < 5:#not in range(int(target_vertices*(1-factor)), int(target_vertices*(1+factor))):
+    #     count += 1
+    #     remesh_increase(mesh, targetlen=targetlen)
+    #     targetlen //= 2
+    ###
+    newFilePath = f"{newfolderpath}/{classname}/{filename}"
+
+    if not os.path.exists(f"{newfolderpath}/{classname}"):
+        os.makedirs(f"{newfolderpath}/{classname}")
+
+    mesh = o3d_to_pml(scale_unitcube(flip_mesh(transform(pml_to_o3d(mesh)))))
+    mesh.save_current_mesh(newFilePath)
+
+    vAfter = mesh.current_mesh().vertex_number()
+    fAfter = mesh.current_mesh().face_number()
+    print(f"Vertices after: {vAfter}, Faces after: {fAfter}")
+    return mesh, vAfter, fAfter, newFilePath
+            
+
 def run_resampling_pml(dbpath=r"./database/", target_vertices=7000, factor=0.1, newfolderpath = "./resampled5"):
 
     for class_folder in os.listdir(dbpath):
@@ -324,3 +387,19 @@ def run_resampling_o3d(dbpath=r"./database/", target_vertices=7000, factor=0.1, 
                     print(e)
                     print(f"Failed to convert {obj_file_path}", file=log)
                 log.close()
+
+def resample_single_file(mesh, target_vertices=7000):
+    if not isinstance(mesh, pml.MeshSet):
+        mesh = o3d_to_pml(mesh)
+    newmesh, _, _, _ = remesh_pml2(mesh, "test", "test.obj", target_vertices=target_vertices)
+    return newmesh
+
+# mesh = pml.MeshSet()
+# path = "./database/Drum/D00115.obj"
+# mesh.load_new_mesh(path)
+# newmesh = resample_single_file(mesh, target_vertices=7000)
+# newmesh = pml_to_o3d(newmesh)
+# mesh = pml_to_o3d(mesh)
+# o3dmesh = o3d.io.read_triangle_mesh(path)
+# o3d.visualization.draw_geometries([o3dmesh], width=1280, height=720, mesh_show_wireframe=True)
+# o3d.visualization.draw_geometries([newmesh], width=1280, height=720, mesh_show_wireframe=True)
