@@ -3,6 +3,7 @@ import open3d as o3d
 import resampling as res
 import feature_extraction as fe
 import custom_distance_function as q
+import tsne_distance_function as tsne
 import numpy as np
 
 
@@ -17,14 +18,21 @@ def query_object():
     results = q.query_feature_file(feature_vector)
     return jsonify({"results": results})
 
-@app.route("/feature", methods=["POST"])
+@app.route("/custom", methods=["POST"])
 def query_object_features():
     content = request.json
     feature_vector = np.load(content['path'], allow_pickle=True)
     results = q.query_feature_file(feature_vector)
     return jsonify({"results": results})
 
-# print(query_object("./database/Bicycle/D00016.obj"))
+
+@app.route("/tsne", methods=["POST"])
+def query_object_features_tsne():
+    content = request.json
+    feature_vector = np.load(content['path'], allow_pickle=True)
+    results = tsne.compute_closest(feature_vector)
+    return jsonify({"results": results})
+
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1',debug=True)

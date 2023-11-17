@@ -26,6 +26,7 @@ if "path" not in st.session_state:
     st.session_state['path'] = None
     st.session_state['type'] = None
     st.session_state['query'] = False
+    st.session_state['method'] = "feature"
 
 
 with st.sidebar:
@@ -63,11 +64,11 @@ with st.sidebar:
         dbpath = "./featuresPML2"
         folders = os.listdir(dbpath)
 
-        class_name = st.selectbox('', folders)
+        class_name = st.selectbox('Class', folders)
         if class_name:
             class_folder_path = os.path.join(dbpath, class_name)
             files = glob.glob(os.path.join(class_folder_path, '*'))
-            file_name = st.selectbox('', ([file.replace(class_folder_path + "\\", "") for file in files]))
+            file_name = st.selectbox('Object', ([file.replace(class_folder_path + "\\", "") for file in files]))
             b21 = st.button('Choose Object')
             if b21: 
                 st.session_state['path'] = class_folder_path + "\\" + file_name
@@ -89,6 +90,7 @@ def callback():
 
 
 if path is not None and not st.session_state['query']:
+    st.session_state['method'] = st.sidebar.selectbox('Query Method', ("custom", "tsne"))
     q = st.sidebar.button('Run Query', on_click=callback)
 
 
@@ -118,7 +120,7 @@ if path is not None and st.session_state['query']:
     st.session_state['query'] = False
     res = None
     if type == "Feature":
-        res = requests.post("http://127.0.0.1:5000/feature", json={"path": path}).json()
+        res = requests.post("http://127.0.0.1:5000/" + st.session_state['method'], json={"path": path}).json()
     else:
         res = requests.post("http://127.0.0.1:5000", json={"path": path}).json()
 

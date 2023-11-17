@@ -1,9 +1,13 @@
 import numpy as np
 import os
 import glob
+import multiprocessing
+from tqdm import tqdm
 import standerdization as st
 import math
-
+from collections import Counter
+import cv2 as cv
+from scipy.spatial import distance
 
 from scipy.stats import wasserstein_distance
 from scipy.spatial.distance import euclidean
@@ -20,37 +24,77 @@ def load_data(dbpath):
             data_path.append(obj_file_path)
     return data, data_path
 
-def compute_emd_cols(target, matrix, cols, out):
+def compute_scalar_cols(target, matrix, cols, w1, out):
+    weights = [w1[c] for c in cols]
     rows = len(matrix)
-    for col in cols:
-        for row in range(rows):
-            out[row][col] = wasserstein_distance(target[col], matrix[row][col])
+    for row in range(rows):
+        target_vec = []
+        row_vec = []
+        for col in cols:
+            target_vec.append(target[col])
+            row_vec.append(matrix[row][col])
+        out[row][0] = euclidean(target_vec, row_vec, weights)
     return out
 
-def compute_distance_cols(target, matrix, cols, out):
+def compute_euc_cols(target, matrix, cols, w1, out):
+    weights = np.asarray([w1[c] for c in cols])
     rows = len(matrix)
-    for col in cols:
-        for row in range(rows):
-            out[row][col] = abs(target[col] - matrix[row][col])
+    for row in range(rows):
+        euc_out = np.zeros((len(cols)))
+        for i in range(len(cols)):
+            euc_out[i] = euclidean(target[cols[i]], matrix[row][cols[i]])
+        out[row][1] = sum(euc_out * weights)
     return out
 
-def euclidean_average(vector, weights):
-    return math.sqrt(sum(weights * vector * vector))
+def compute_cos_cols(target, matrix, cols, w1, out):
+    weights = np.asarray([w1[c] for c in cols])
+    rows = len(matrix)
+    for row in range(rows):
+        euc_out = np.zeros((len(cols)))
+        for i in range(len(cols)):
+            euc_out[i] = distance.cosine(target[cols[i]], matrix[row][cols[i]])
+        out[row][2] = sum(euc_out * weights)
+    return out
 
-def calculate_distances(data, target, scalar_indexes, hist_indexes, weights):
-    res = np.zeros((len(data), len(scalar_indexes + hist_indexes)))
-    res = compute_emd_cols(target, data, hist_indexes, res)
-    res = compute_distance_cols(target, data, scalar_indexes, res)
-    distances = [euclidean_average(row, weights) for row in res]
+def compute_emd_cols(target, matrix, cols, w1, out):
+    weights = np.asarray([w1[c] for c in cols])
+    rows = len(matrix)
+    for row in range(rows):
+        euc_out = np.zeros((len(cols)))
+        for i in range(len(cols)):
+            euc_out[i] = wasserstein_distance(target[cols[i]], matrix[row][cols[i]])
+        out[row][3] = sum(euc_out * weights)
+    return out
+
+def normalize_distance(res):
+    (_, cols) = np.shape(res)
+    max_vals = np.asarray([np.max(res[:, i]) for i in range(cols)])
+    max_vals[max_vals == 0] = 1
+    return np.divide(res, max_vals)
+
+
+def calculate_distances(data, target, scalar_indexes, euc_indexes, cos_indexes, emd_indexes, w1, w2):
+    res = np.zeros((len(data), 4))
+    try:
+        res = compute_scalar_cols(target, data, scalar_indexes, w1, res)
+        res = compute_euc_cols(target, data, euc_indexes, w1, res)
+        res = compute_cos_cols(target, data, cos_indexes, w1, res)
+        res = compute_emd_cols(target, data, emd_indexes, w1, res)
+        res = normalize_distance(res)
+        distances = [sum(row * w2) for row in res]
+    except Exception as err:
+        print(f"Unexpected {err=}, {type(err)=}")
     return distances
 
-def top_n_closest_objects(data, paths, target, w, n=10):
+def top_n_closest_objects(data, paths, target, w1, w2, n=10):
     scalar_indexes = [0, 1, 2, 3, 4, 13, 14, 15, 16, 17, 18, 19, 20]
-    hist_indexes = [5, 6, 7, 8, 9, 10, 11, 12]
+    euc_indexes = []
+    cos_indexes = []
+    emd_indexes = [5, 6, 7, 8, 9, 10, 11, 12]
     data.append(target)
     data = st.standardize_cols(data, scalar_indexes)
     target = data.pop()
-    distances = calculate_distances(data, target, scalar_indexes, hist_indexes, w)
+    distances = calculate_distances(data, target, scalar_indexes, euc_indexes, cos_indexes, emd_indexes, w1, w2)
     res = [(distances[i], paths[i]) for i in range(len(distances))]
     res.sort(key=lambda x: x[0])
     if n == None:
@@ -58,10 +102,14 @@ def top_n_closest_objects(data, paths, target, w, n=10):
     else:
         return res[:n]
 
+
 def query_feature_file(target_vector):
     data, paths = load_data(r"./featuresPML2/")
-    w = [0.04133703, 0.0244479, 0.03354204, 0.03047129, 0.04051029, 
-          0.06507629, 0.04133703, 0.0448802, 0.04051029, 0.03436878, 
-          0.12936596, 0.12486482, 0.10507516, 0.03850249, 0.03593279, 
-          0.04139966, 0.03251526, 0.0326816, 0.03799905, 0.04065344, 0.03452864]
-    return top_n_closest_objects(data, paths, target_vector, w)
+
+    w1 = np.asarray([0.0507, 0.0300, 0.0412, 0.0374, 0.0497,
+                     0.1308, 0.0750, 0.1326, 0.1038, 0.0752,
+                     0.1676, 0.1687, 0.1578, 0.0472, 0.0441,
+                     0.0508, 0.0399, 0.0401, 0.0466, 0.0499, 0.0424]) - 0.025
+    w2 = np.asarray([0.3621, 0.1992, 0, 0.3095]) - 0.025
+
+    return top_n_closest_objects(data, paths, target_vector, w1, w2)
