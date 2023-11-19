@@ -50,7 +50,7 @@ def compute_tsne(data):
     db = flatten(data)
   
     test_db = pd.DataFrame(db)
-    tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=10000)
+    tsne = TSNE(n_components=2, verbose=1, perplexity=20, n_iter=450)
     tsne_results = tsne.fit_transform(test_db)
     return tsne_results[:,:2]
 
