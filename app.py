@@ -1,6 +1,7 @@
 from subprocess import call
 import threading
+import src.main as main
 
-t = threading.Thread(target=lambda _: call(["python", "./src/main.py"]), args=(1,))
+t = threading.Thread(target=lambda _: call(["streamlit", "run", "./ui.py"]), args=(1,))
 t.start()
-call(["streamlit", "run", "./ui.py"])
+main.main("Run")

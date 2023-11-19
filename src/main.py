@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append("./src")
+
 from flask import Flask, request, jsonify
 import open3d as o3d
 import resampling as res
@@ -5,6 +9,7 @@ import feature_extraction as fe
 import custom_distance_function as q
 import tsne_distance_function as tsne
 import numpy as np
+
 
 
 app = Flask(__name__)
@@ -34,7 +39,7 @@ def query_object_features_tsne():
     return jsonify({"results": results})
 
 
-def main():
+def main(_):
     app.run(host='127.0.0.1',debug=True)
 
 if __name__ == '__main__':
