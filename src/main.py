@@ -34,5 +34,8 @@ def query_object_features_tsne():
     return jsonify({"results": results})
 
 
-if __name__ == '__main__':
+def main():
     app.run(host='127.0.0.1',debug=True)
+
+if __name__ == '__main__':
+    main()

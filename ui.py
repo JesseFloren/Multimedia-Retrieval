@@ -81,6 +81,8 @@ with st.sidebar:
                 plotter.background_color = 'black'
                 stpyvista(plotter, key="target2", horizontal_align="left")
 
+st.title("3D Objects Retrieval System")
+
 st.header("Results")
 path = st.session_state['path']
 type = st.session_state['type']
