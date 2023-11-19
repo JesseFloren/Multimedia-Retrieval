@@ -81,6 +81,8 @@ with st.sidebar:
                 plotter.background_color = 'black'
                 stpyvista(plotter, key="target2", horizontal_align="left")
 
+st.title("3D Objects Retrieval System")
+
 st.header("Results")
 path = st.session_state['path']
 type = st.session_state['type']
@@ -120,9 +122,9 @@ if path is not None and st.session_state['query']:
     st.session_state['query'] = False
     res = None
     if type == "Feature":
-        res = requests.post("http://127.0.0.1:5000/" + st.session_state['method'], json={"path": path}).json()
+        res = requests.post("http://127.0.0.1:5000/db/" + st.session_state['method'], json={"path": path}).json()
     else:
-        res = requests.post("http://127.0.0.1:5000", json={"path": path}).json()
+        res = requests.post("http://127.0.0.1:5000/" + st.session_state['method'], json={"path": path}).json()
 
 
     currentDateAndTime = datetime.now()
